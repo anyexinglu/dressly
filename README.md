@@ -33,6 +33,27 @@ npm run poc:gateways
 
 它不会伪造业务数据：仅连续探测官方网关能否稳定抵达并返回可解析的鉴权错误。运行结果写入 `poc/report.json`（已忽略），真实商品准确性需要配置三个联盟账户的授权后再执行抽样。
 
+拿到联盟开发者身份后，运行以下命令拉取三个官方商品池的首批 10 条“连衣裙”结果：
+
+```bash
+npm run poc:official-products
+```
+
+输出写入 `poc/official-products-report.json`（已忽略）。它统一记录商品 ID、标题、官方主图 URL、标价、推广价、券额、落地链接和字段完整性；缺少凭据时明确输出 `blocked`，不会把网关响应伪装成商品数据。
+
+本地 `.env`（绝不提交）需要配置：
+
+```dotenv
+PDD_CLIENT_ID=
+PDD_CLIENT_SECRET=
+PDD_PID=
+JD_APP_KEY=
+JD_APP_SECRET=
+TAOBAO_APP_KEY=
+TAOBAO_APP_SECRET=
+TAOBAO_ADZONE_ID=
+```
+
 ## 需要的平台身份
 
 申请的是三个联盟的推广者/开发者能力与推广位，不是向每一家店铺逐一申请商家授权：淘宝联盟、京东联盟、多多进宝。密钥只能保存在服务端环境变量，绝不提交到 Git。

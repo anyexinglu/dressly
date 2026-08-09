@@ -1,3 +1,4 @@
 .env
 poc/report.json
+poc/official-products-report.json
 node_modules/
