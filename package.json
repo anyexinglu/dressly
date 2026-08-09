@@ -1,0 +1,9 @@
+{
+  "name": "dressly-daily-outfits",
+  "version": "0.1.0",
+  "private": false,
+  "type": "module",
+  "scripts": {
+    "poc:gateways": "node poc/channel-gateway-poc.mjs"
+  }
+}
