@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Dressly 每日穿搭与 AI 一键试衣概念验证">
+  <title>Dressly · 每日穿搭</title>
+  <link rel="preconnect" href="https://img.pddpic.com">
+  <link rel="preconnect" href="https://img.alicdn.com">
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <div class="page-shell">
+    <header class="topbar">
+      <a class="brand" href="#top" aria-label="Dressly 首页">
+        <span class="brand-mark">D</span>
+        <span>dressly</span>
+      </a>
+      <nav aria-label="主导航">
+        <a class="active" href="#studio">试衣间</a>
+        <a href="#products">今日单品</a>
+        <a href="#about">关于 POC</a>
+      </nav>
+      <span class="poc-badge">LIVE POC</span>
+    </header>
+
+    <main id="top">
+      <section class="hero">
+        <div class="hero-copy">
+          <p class="eyebrow">DAILY OUTFITS · 每日穿搭</p>
+          <h1>一句话找到衣服，<br><em>一键穿到身上。</em></h1>
+          <p class="hero-intro">输入今天的场景和风格，Dressly 从真实联盟商品里选衣服，用 AI 生成试穿效果。</p>
+          <div class="prompt-box">
+            <label for="stylePrompt">今天想怎么穿？</label>
+            <div class="prompt-row">
+              <input id="stylePrompt" value="周末约会，温柔法式女装" autocomplete="off">
+              <button id="searchButton" type="button">找穿搭 <span>→</span></button>
+            </div>
+            <div class="chips" aria-label="推荐提示词">
+              <button type="button" data-prompt="通勤 简约 衬衫">通勤简约</button>
+              <button type="button" data-prompt="甜酷 辣妹 套装">甜酷辣妹</button>
+              <button type="button" data-prompt="法式 连衣裙">法式连衣裙</button>
+            </div>
+          </div>
+        </div>
+        <div class="hero-art" aria-hidden="true">
+          <div class="sun"></div>
+          <div class="arch arch-one"></div>
+          <div class="arch arch-two"></div>
+          <div class="figure">
+            <span class="head"></span><span class="hair"></span><span class="body"></span><span class="skirt"></span><span class="leg left"></span><span class="leg right"></span>
+          </div>
+          <span class="art-note">YOUR LOOK<br>IN SECONDS</span>
+        </div>
+      </section>
+
+      <section class="studio" id="studio">
+        <div class="section-heading">
+          <div><p class="eyebrow">AI FITTING ROOM</p><h2>一键试衣间</h2></div>
+          <p>选一件真实商品，公开示例模特会替你完成本次非商业效果 POC。</p>
+        </div>
+
+        <div class="fitting-grid">
+          <article class="stage-card">
+            <div class="stage-top"><span>01</span><h3>选择衣服</h3><small id="channelLabel">联盟商品</small></div>
+            <div class="image-frame garment-frame"><img id="garmentPreview" alt="当前选择的服装"></div>
+            <p id="garmentTitle" class="selection-title">正在加载真实商品…</p>
+            <div class="price-line"><strong id="garmentPrice">—</strong><span>页面参考价</span></div>
+          </article>
+
+          <div class="flow-arrow" aria-hidden="true">+</div>
+
+          <article class="stage-card">
+            <div class="stage-top"><span>02</span><h3>示例模特</h3><small>公开样例</small></div>
+            <div class="image-frame model-frame" id="modelFrame">
+              <img id="modelPreview" alt="IDM-VTON 公开示例模特">
+              <div class="model-placeholder"><span></span><b>DEMO<br>MODEL</b></div>
+            </div>
+            <p class="selection-title">IDM-VTON 官方内置人像</p>
+            <div class="privacy-line"><span>✓</span> 不上传你的真人照片</div>
+          </article>
+
+          <div class="flow-arrow accent" aria-hidden="true">→</div>
+
+          <article class="stage-card result-card">
+            <div class="stage-top"><span>03</span><h3>试穿效果</h3><small>AI 生成</small></div>
+            <div class="image-frame result-frame" id="resultFrame">
+              <img id="resultPreview" alt="AI 试衣结果">
+              <div class="result-empty"><i>✦</i><p>选择衣服后<br>点击一键试穿</p></div>
+              <div class="result-loading" hidden><i></i><p id="loadingText">正在理解衣服版型…</p></div>
+            </div>
+            <button id="tryOnButton" class="try-button" type="button"><span>✦</span> 一键试穿</button>
+            <p id="statusText" class="status-text">约需 30–90 秒 · 共享算力可能排队</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="products-section" id="products">
+        <div class="section-heading compact">
+          <div><p class="eyebrow">REAL PRODUCTS</p><h2>今日可试单品</h2></div>
+          <div class="source-tabs"><button class="selected" data-source="all">全部</button><button data-source="拼多多">拼多多</button><button data-source="淘宝天猫">淘宝天猫</button></div>
+        </div>
+        <div id="productGrid" class="product-grid" aria-live="polite"></div>
+      </section>
+
+      <section class="about" id="about">
+        <p><b>POC 边界</b> 商品标题、图片和价格来自已登录联盟选品页；价格仅作参考，以平台结算页为准。试衣使用非商业公共演示，不代表生产 SLA 或商用授权。</p>
+      </section>
+    </main>
+  </div>
+  <script type="module" src="/app.js"></script>
+</body>
+</html>

@@ -4,6 +4,7 @@
   "private": false,
   "type": "module",
   "scripts": {
+    "dev": "node app/server.mjs",
     "poc:gateways": "node poc/channel-gateway-poc.mjs",
     "poc:official-products": "node poc/official-product-poc.mjs",
     "poc:query-router:test": "node poc/query-router.mjs --self-test",
