@@ -16,7 +16,7 @@ function selectProduct(product) {
   elements.channelLabel.textContent = product.channel;
   elements.resultPreview.removeAttribute("src");
   elements.resultFrame.classList.remove("has-result");
-  elements.statusText.textContent = "约需 30–90 秒 · 共享算力可能排队";
+  elements.statusText.textContent = "免费共享算力 · 实验性服务，可能排队或失败";
   renderProducts();
   document.getElementById("studio").scrollIntoView({ behavior: "smooth", block: "start" });
 }
@@ -57,6 +57,9 @@ async function loadCatalog() {
       elements.garmentPrice.textContent = money(state.selected.price);
       elements.channelLabel.textContent = state.selected.channel;
     }
+    elements.statusText.textContent = catalog.provider.failures
+      ? `免费共享服务不稳定 · 本进程已失败 ${catalog.provider.failures} 次`
+      : "免费共享算力 · 实验性服务，可能排队或失败";
     renderProducts();
   } catch (error) {
     elements.productGrid.innerHTML = `<p>${error.message}</p>`;
@@ -88,11 +91,13 @@ async function tryOn() {
     if (!response.ok) throw new Error(result.error || "试衣生成失败");
     elements.resultPreview.src = result.imageUrl;
     elements.resultFrame.classList.add("has-result");
-    elements.statusText.textContent = `已完成 · 任务 ${result.eventId.slice(0, 8)}`;
+    elements.statusText.textContent = result.live
+      ? `实时生成完成 · 尝试 ${result.attempts} 次 · 任务 ${result.eventId.slice(0, 8)}`
+      : `实时服务失败 · 展示 ${result.verifiedAt} 已验证缓存结果`;
   } catch (error) {
-    elements.statusText.textContent = error.message;
+    elements.statusText.textContent = `未生成成功 · ${error.message}`;
     elements.resultFrame.querySelector(".result-empty").hidden = false;
-    elements.resultFrame.querySelector(".result-empty p").textContent = "共享服务暂忙\n请稍后再试";
+    elements.resultFrame.querySelector(".result-empty p").textContent = "本次没有生成结果\n免费服务当前不可用";
   } finally {
     clearInterval(ticker);
     setLoading(false);

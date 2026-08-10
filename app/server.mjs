@@ -31,6 +31,9 @@ const products = samples.flatMap((sample, sampleIndex) => sample.products
 
 let demoModel;
 let activeTryOn;
+let demoModelAsset;
+const resultCache = new Map();
+const serviceStats = { successes: 0, failures: 0, lastSuccessAt: null, lastError: null };
 
 async function getJson(url, options = {}) {
   const response = await fetch(url, options);
@@ -47,7 +50,7 @@ async function getDemoModel() {
   return demoModel;
 }
 
-async function runTryOn(product) {
+async function runTryOnOnce(product) {
   const human = await getDemoModel();
   const productResponse = await fetch(product.imageUrl, { signal: AbortSignal.timeout(20_000) });
   if (!productResponse.ok) throw new Error(`商品图读取失败：HTTP ${productResponse.status}`);
@@ -83,7 +86,56 @@ async function runTryOn(product) {
   const output = outputs.find(({ url }) => url);
   if (!output?.url) throw new Error("试衣服务没有返回结果图");
 
-  return { eventId: submission.event_id, imageUrl: output.url, mimeType: output.mime_type, product };
+  const outputResponse = await fetch(output.url, { signal: AbortSignal.timeout(30_000) });
+  if (!outputResponse.ok) throw new Error(`结果图读取失败：HTTP ${outputResponse.status}`);
+  const resultId = submission.event_id;
+  resultCache.set(resultId, {
+    bytes: Buffer.from(await outputResponse.arrayBuffer()),
+    contentType: outputResponse.headers.get("content-type") || output.mime_type || "image/png",
+  });
+  return { eventId: resultId, imageUrl: `/api/results/${resultId}`, mimeType: output.mime_type, product, live: true, cached: false };
+}
+
+async function getVerifiedFallback(product, errors) {
+  if (product.id !== "pdd-0") return null;
+  const resultId = "verified-cache-pdd-0-20260810";
+  if (!resultCache.has(resultId)) {
+    resultCache.set(resultId, {
+      bytes: await readFile(join(appDirectory, "assets/verified-pdd-tryon.png")),
+      contentType: "image/png",
+    });
+  }
+  return {
+    eventId: resultId,
+    imageUrl: `/api/results/${resultId}`,
+    mimeType: "image/png",
+    product,
+    live: false,
+    cached: true,
+    verifiedAt: "2026-08-10",
+    liveError: errors.at(-1),
+  };
+}
+
+async function runTryOn(product) {
+  const errors = [];
+  for (let attempt = 1; attempt <= 2; attempt += 1) {
+    try {
+      const result = await runTryOnOnce(product);
+      serviceStats.successes += 1;
+      serviceStats.lastSuccessAt = new Date().toISOString();
+      serviceStats.lastError = null;
+      return { ...result, attempts: attempt };
+    } catch (error) {
+      errors.push(error.message);
+      if (attempt < 2) await new Promise((resolve) => setTimeout(resolve, 1_500));
+    }
+  }
+  serviceStats.failures += 1;
+  serviceStats.lastError = errors.at(-1);
+  const fallback = await getVerifiedFallback(product, errors);
+  if (fallback) return { ...fallback, attempts: errors.length };
+  throw new Error(`IDM-VTON 免费共享服务连续 ${errors.length} 次失败：${errors.at(-1)}`);
 }
 
 function sendJson(response, status, value) {
@@ -108,9 +160,29 @@ const server = createServer(async (request, response) => {
   try {
     const url = new URL(request.url, `http://${host}:${port}`);
     if (request.method === "GET" && url.pathname === "/api/catalog") {
-      let modelImageUrl = fallbackModelImageUrl;
-      try { modelImageUrl = (await getDemoModel()).url || fallbackModelImageUrl; } catch {}
-      return sendJson(response, 200, { products, modelImageUrl });
+      return sendJson(response, 200, {
+        products,
+        modelImageUrl: "/assets/demo-model",
+        provider: { id: "idm-vton-public-space", mode: "free-shared-experimental", ...serviceStats },
+      });
+    }
+    if (request.method === "GET" && url.pathname === "/assets/demo-model") {
+      if (!demoModelAsset) {
+        demoModelAsset = {
+          bytes: await readFile(join(appDirectory, "assets/demo-model.jpg")),
+          contentType: "image/jpeg",
+        };
+      }
+      response.writeHead(200, { "Content-Type": demoModelAsset.contentType, "Cache-Control": "public, max-age=3600" });
+      response.end(demoModelAsset.bytes);
+      return;
+    }
+    if (request.method === "GET" && url.pathname.startsWith("/api/results/")) {
+      const result = resultCache.get(url.pathname.slice("/api/results/".length));
+      if (!result) return sendJson(response, 404, { error: "结果已过期，请重新生成" });
+      response.writeHead(200, { "Content-Type": result.contentType, "Cache-Control": "no-store" });
+      response.end(result.bytes);
+      return;
     }
     if (request.method === "POST" && url.pathname === "/api/tryon") {
       const { productId } = await readBody(request);
@@ -120,6 +192,8 @@ const server = createServer(async (request, response) => {
       activeTryOn = runTryOn(product);
       try {
         return sendJson(response, 200, await activeTryOn);
+      } catch (error) {
+        return sendJson(response, 503, { error: error.message, provider: "IDM-VTON public Hugging Face Space" });
       } finally {
         activeTryOn = null;
       }

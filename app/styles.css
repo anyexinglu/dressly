@@ -85,6 +85,8 @@ h1 em { color: var(--orange); font-weight: 500; }
 .result-card { box-shadow: 0 18px 48px rgba(29,28,26,.08); }
 .result-empty, .result-loading { position: absolute; inset: 0; display: grid; place-content: center; text-align: center; color: var(--muted); }
 .result-loading[hidden] { display: none; }
+.result-frame > img { display: none; }
+.result-frame.has-result > img { display: block; }
 .result-empty i { color: var(--orange); font-size: 28px; font-style: normal; }.result-empty p { line-height: 1.55; }
 .result-loading { background: rgba(235,231,223,.94); }.result-loading i { width: 34px; height: 34px; margin: 0 auto 14px; border: 3px solid #d4cec3; border-top-color: var(--orange); border-radius: 50%; animation: spin 1s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
