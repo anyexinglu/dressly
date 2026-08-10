@@ -10,15 +10,30 @@ const appDirectory = fileURLToPath(new URL("./", import.meta.url));
 const pocDirectory = fileURLToPath(new URL("../poc/", import.meta.url));
 const host = "127.0.0.1";
 const port = Number(process.env.PORT || 4173);
+const bundledDemoModel = join(appDirectory, "assets/demo-model.jpg");
+const fullBodyDemoModel = join(appDirectory, "../.local-models/CatVTON/resource/demo/example/person/women/model_8.png");
+let demoModelFile = bundledDemoModel;
+try {
+  await stat(fullBodyDemoModel);
+  demoModelFile = fullBodyDemoModel;
+} catch {
+  // CatVTON 尚未安装时保留仓库内置示例，模型就绪后重启服务即可切换。
+}
 const requiredLocalModels = [
   ["../.cache/huggingface/models--stable-diffusion-v1-5--stable-diffusion-inpainting/blobs/24b788b4a777748377cc20364eea4ae113c8c42f4468c16bc8c02fdae5492af9", 1_719_154_104],
   ["../.cache/huggingface/models--stabilityai--sd-vae-ft-mse/blobs/a1d993488569e928462932c8c38a0760b874d166399b14414135bd9c42df5815", 334_643_276],
   ["../.cache/huggingface/models--zhengchong--CatVTON/blobs/a1fc093f1b6744623079e6f4e7313411f524e388c4b7467df1e0e7f577cba23a", 198_303_368],
+  ["../.local-models/runtime/segformer-clothes/model.safetensors", 109_493_236],
 ];
 const localAvatarFiles = {
   front: process.env.DRESSLY_LOCAL_AVATAR_FRONT,
   side: process.env.DRESSLY_LOCAL_AVATAR_SIDE,
   back: process.env.DRESSLY_LOCAL_AVATAR_BACK,
+};
+const tryOnProfiles = {
+  "taobao-0": { quality: "recommended", qualityLabel: "推荐试穿", qualityReason: "白底完整服装图，轮廓与纹理信息充足" },
+  "pdd-3": { quality: "workable", qualityLabel: "可尝试", qualityReason: "服装轮廓完整，但真人遮挡会降低细节还原" },
+  "pdd-4": { quality: "workable", qualityLabel: "可尝试", qualityReason: "搭配拼图可提取服装，但不是标准单品图" },
 };
 
 const samples = await Promise.all([
@@ -28,15 +43,23 @@ const samples = await Promise.all([
 
 const products = samples.flatMap((sample, sampleIndex) => sample.products
   .filter(({ imageUrl }) => imageUrl)
-  .map((product, productIndex) => ({
-    id: `${sampleIndex === 0 ? "pdd" : "taobao"}-${productIndex}`,
-    channel: sampleIndex === 0 ? "拼多多" : "淘宝天猫",
-    sourceUrl: sample.sourceUrl,
-    title: product.title,
-    price: product.price,
-    priceType: product.priceType || "页面参考价",
-    imageUrl: product.imageUrl,
-  })));
+  .map((product, productIndex) => {
+    const id = `${sampleIndex === 0 ? "pdd" : "taobao"}-${productIndex}`;
+    return {
+      id,
+      channel: sampleIndex === 0 ? "拼多多" : "淘宝天猫",
+      sourceUrl: sample.sourceUrl,
+      title: product.title,
+      price: product.price,
+      priceType: product.priceType || "页面参考价",
+      imageUrl: product.imageUrl,
+      ...(tryOnProfiles[id] || {
+        quality: "limited",
+        qualityLabel: "主图受限",
+        qualityReason: "真人摆拍遮挡服装，生成结果可能只保留部分颜色和版型",
+      }),
+    };
+  }));
 
 let activeTryOn;
 let demoModelAsset;
@@ -62,6 +85,12 @@ function decodePersonImage(dataUrl) {
   const bytes = Buffer.from(match[2], "base64");
   if (bytes.length > 12 * 1024 * 1024) throw new Error("人物照片不能超过 12MB");
   return { bytes, extension: match[1] === "image/png" ? "png" : match[1] === "image/webp" ? "webp" : "jpg" };
+}
+
+function inferGarmentCategory(title) {
+  if (/裤|短裤|长裤|半身裙/.test(title) && !/套装|两件套|三件套/.test(title)) return "lower";
+  if (/连衣裙|套装|两件套|三件套|套裙|洛丽塔/.test(title)) return "overall";
+  return "upper";
 }
 
 function runCommand(command, args, options = {}) {
@@ -95,16 +124,18 @@ async function runLocalTryOn(product, personImage) {
     await writeFile(garmentPath, Buffer.from(await garmentResponse.arrayBuffer()));
 
     const decoded = decodePersonImage(personImage);
-    const personPath = decoded ? join(requestDirectory, `person.${decoded.extension}`) : join(appDirectory, "assets/demo-model.jpg");
+    const personPath = decoded ? join(requestDirectory, `person.${decoded.extension}`) : demoModelFile;
     if (decoded) await writeFile(personPath, decoded.bytes);
     const outputPath = join(requestDirectory, "result.png");
 
-    await runCommand(join(appDirectory, "../.venv/bin/python"), [
+    const inference = await runCommand(join(appDirectory, "../.venv/bin/python"), [
       join(appDirectory, "../poc/local-catvton-poc.py"),
       "--person", personPath,
       "--garment", garmentPath,
       "--output", outputPath,
-      "--steps", "20",
+      "--steps", "30",
+      "--seed", "0",
+      "--category", inferGarmentCategory(product.title),
     ], {
       cwd: join(appDirectory, ".."),
       env: {
@@ -117,11 +148,20 @@ async function runLocalTryOn(product, personImage) {
       },
     });
 
+    const detailCount = Number(inference.stdout.match(/detail_count=(\d+)/)?.[1] || 0);
+
     resultCache.set(requestId, { bytes: await readFile(outputPath), contentType: "image/png" });
     serviceStats.successes += 1;
     serviceStats.lastSuccessAt = new Date().toISOString();
     serviceStats.lastError = null;
-    return { eventId: requestId, imageUrl: `/api/results/${requestId}`, live: true, cached: false, provider: "local-catvton-mps" };
+    return {
+      eventId: requestId,
+      imageUrl: `/api/results/${requestId}`,
+      live: true,
+      cached: false,
+      provider: "local-catvton-mps",
+      detailReinforcement: { applied: detailCount > 0, count: detailCount },
+    };
   } catch (error) {
     serviceStats.failures += 1;
     serviceStats.lastError = error.message;
@@ -156,25 +196,25 @@ const server = createServer(async (request, response) => {
       const readiness = await getLocalModelReadiness();
       return sendJson(response, 200, {
         products,
-        modelImageUrl: "/assets/demo-model",
+        modelImageUrl: `/assets/demo-model?v=${demoModelFile === fullBodyDemoModel ? "fullbody-face-v3" : "bundled-v1"}`,
         provider: { id: "local-catvton-mps", mode: "local-non-commercial-poc", ...readiness, ...serviceStats },
       });
     }
     if (request.method === "GET" && url.pathname === "/assets/demo-model") {
       if (!demoModelAsset) {
         demoModelAsset = {
-          bytes: await readFile(join(appDirectory, "assets/demo-model.jpg")),
-          contentType: "image/jpeg",
+          bytes: await readFile(demoModelFile),
+          contentType: extname(demoModelFile).toLowerCase() === ".png" ? "image/png" : "image/jpeg",
         };
       }
-      response.writeHead(200, { "Content-Type": demoModelAsset.contentType, "Cache-Control": "public, max-age=3600" });
+      response.writeHead(200, { "Content-Type": demoModelAsset.contentType, "Cache-Control": "no-store" });
       response.end(demoModelAsset.bytes);
       return;
     }
     if (request.method === "GET" && url.pathname === "/api/local-avatar") {
-      const enabled = Object.values(localAvatarFiles).every(Boolean);
+      const enabled = Boolean(localAvatarFiles.front);
       return sendJson(response, enabled ? 200 : 404, enabled
-        ? { photos: Object.fromEntries(Object.keys(localAvatarFiles).map((view) => [view, `/api/local-avatar/${view}`])) }
+        ? { photos: Object.fromEntries(Object.entries(localAvatarFiles).filter(([, file]) => Boolean(file)).map(([view]) => [view, `/api/local-avatar/${view}`])) }
         : { error: "本机分身照片未配置" });
     }
     if (request.method === "GET" && url.pathname.startsWith("/api/local-avatar/")) {

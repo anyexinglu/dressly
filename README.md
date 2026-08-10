@@ -8,18 +8,18 @@ Dressly 是一个“每日穿搭”概念验证项目：根据风格和预算组
 npm run dev
 ```
 
-访问 <http://127.0.0.1:4173>。界面会载入已核验的拼多多与淘宝联盟商品样本，并在本机 Apple MPS 上运行 CatVTON 非商业试衣 POC。示例人物和用户主动选择的正面照都只进入本机 Node/Python 进程；结果必须由本次请求新生成，失败时不会回退到历史缓存图。
+访问 <http://127.0.0.1:4173>。界面会载入已核验的拼多多与淘宝联盟商品样本，并在本机 Apple MPS 上运行 CatVTON 非商业试衣 POC。创建照片分身只需一张正面照；侧面、背面照片为可选的多视角预览补充。示例人物和用户主动选择的正面照都只进入本机 Node/Python 进程；结果必须由本次请求新生成，失败时不会回退到历史缓存图。
 
 首次运行前需要准备隔离环境与官方模型（模型缓存不会提交 Git）：
 
 ```bash
 python3 -m venv .venv
-.venv/bin/pip install torch==2.2.2 torchvision==0.17.2 diffusers==0.29.2 transformers==4.27.3 accelerate==0.31.0 huggingface_hub==0.23.4 hf_transfer numpy==1.26.4 pillow safetensors
+.venv/bin/pip install torch==2.2.2 torchvision==0.17.2 diffusers==0.29.2 transformers==4.27.3 accelerate==0.31.0 huggingface_hub==0.23.4 hf_transfer numpy==1.26.4 pillow safetensors opencv-python
 git clone --depth 1 https://github.com/Zheng-Chong/CatVTON.git .local-models/CatVTON
 npm run poc:local-catvton -- --garment /path/to/garment.jpg
 ```
 
-首次 POC 只需准备实际推理所需的 fp16 UNet、VAE 和 CatVTON attention 权重；后续页面请求复用本地缓存。2026-08-10 已在 Apple M5 / MPS 上完成 20 步真实生成，并通过页面按钮得到新的 384×512 结果（`live: true`、`cached: false`）。CatVTON 材料为 `CC BY-NC-SA 4.0`，这条链路只能用于非商业技术验证。联盟商品常是穿在人身上的展示图，而 CatVTON 更适合纯服装图；前者已能生成，但服装纹理和版型还原不稳定，后续需要服装分割或更适配的商品素材。
+首次 POC 需要 fp16 UNet、VAE、CatVTON attention，以及 `mattmdjaga/segformer_b2_clothes` 服装解析权重；后续页面请求复用本地缓存。2026-08-10 已在 Apple M5 / MPS 上以 30 步、576×768 完成优化版真实生成：整体试衣用凸包蒙版补齐两腿之间的裙摆空间，白底商品按真实前景紧裁，卖家真人图先提取服装，并固定使用消融测试较稳定的 seed 0；人物脸、头发、手臂、鞋和背景由解析蒙版保护。扩散生成后还会检测深色衣身上的稀疏高对比小装饰，按逐行衣身宽度将仿钻、波点等细节映射回上身；只有 6–140 个小组件且覆盖率低于阈值时才触发，纯色、复杂印花和下装不会自动回贴。页面默认使用全身示例并选择白底完整商品，真人遮挡主图会标为“主图受限”。CatVTON 材料为 `CC BY-NC-SA 4.0`，这条链路只能用于非商业技术验证；真人摆拍中被身体遮住的服装细节无法靠预处理恢复，生产链路仍应优先取得白底、平铺或完整轮廓商品图。
 
 ## 数据边界
 

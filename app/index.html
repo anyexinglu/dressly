@@ -30,7 +30,7 @@
         <div class="hero-copy">
           <p class="eyebrow">DIGITAL TWIN · DAILY OUTFITS</p>
           <h1>先遇见数字分身，<br><em>再决定今天穿什么。</em></h1>
-          <p class="hero-intro">Dressly 把「拍三张照片」和「一键试穿」拆开：先建立可控的个人分身，再用真实联盟商品生成穿搭效果。</p>
+          <p class="hero-intro">Dressly 把「上传一张正面照」和「一键试穿」拆开：先建立可控的个人分身，再用真实联盟商品生成穿搭效果。</p>
           <div class="prompt-box">
             <label for="stylePrompt">今天想怎么穿？</label>
             <div class="prompt-row">
@@ -69,29 +69,29 @@
 
       <section class="avatar-studio" id="avatar">
         <div class="section-heading">
-          <div><p class="eyebrow">YOUR DIGITAL TWIN</p><h2>用三张照片，开始建立分身</h2></div>
-          <p>前、侧、背照片只在本机生成预览；真正提交生成前，用户需要明确同意并看到保存与删除规则。</p>
+          <div><p class="eyebrow">YOUR DIGITAL TWIN</p><h2>用一张照片，开始建立分身</h2></div>
+          <p>上传一张正面照即可建立本地分身；侧面和背面照可选，用于补充不同角度的预览。照片只在本机处理。</p>
         </div>
         <div class="avatar-layout">
           <article class="capture-card">
             <div class="capture-copy"><span>STEP 01</span><h3>拍摄引导</h3><p>同一光线、贴身衣物、双手自然下垂。照片用于轮廓与姿态估计，不用来判断“身材好坏”。</p></div>
             <div class="capture-slots">
-              <label class="capture-slot" for="photoFront"><input id="photoFront" type="file" accept="image/*" hidden><span class="upload-icon">＋</span><b>正面</b><small>正对镜头</small><img alt="正面照片预览"></label>
-              <label class="capture-slot" for="photoSide"><input id="photoSide" type="file" accept="image/*" hidden><span class="upload-icon">＋</span><b>侧面</b><small>左或右侧</small><img alt="侧面照片预览"></label>
-              <label class="capture-slot" for="photoBack"><input id="photoBack" type="file" accept="image/*" hidden><span class="upload-icon">＋</span><b>背面</b><small>背对镜头</small><img alt="背面照片预览"></label>
+              <label class="capture-slot" for="photoFront"><input id="photoFront" type="file" accept="image/*" hidden><span class="upload-icon">＋</span><b>正面 <em>必需</em></b><small>正对镜头</small><img alt="正面照片预览"></label>
+              <label class="capture-slot" for="photoSide"><input id="photoSide" type="file" accept="image/*" hidden><span class="upload-icon">＋</span><b>侧面 <em>可选</em></b><small>左或右侧</small><img alt="侧面照片预览"></label>
+              <label class="capture-slot" for="photoBack"><input id="photoBack" type="file" accept="image/*" hidden><span class="upload-icon">＋</span><b>背面 <em>可选</em></b><small>背对镜头</small><img alt="背面照片预览"></label>
             </div>
-            <div class="capture-action"><p class="local-note" id="captureStatus">本地预览模式 · 尚未上传任何个人照片</p><button id="generateAvatarButton" type="button" disabled>上传 3 张后生成本地分身 <span>→</span></button></div>
+            <div class="capture-action"><p class="local-note" id="captureStatus">本地预览模式 · 上传一张正面照即可生成</p><button id="generateAvatarButton" type="button" disabled>上传正面照后生成本地分身 <span>→</span></button></div>
           </article>
           <article class="twin-card">
             <div class="twin-top"><span>YOUR TWIN / POC</span><button id="rotateAvatar" type="button">旋转视角 ↻</button></div>
             <div class="twin-viewport" id="twinViewport" data-view="front">
               <div class="twin-halo"></div><div class="twin-shadow"></div>
-              <img id="avatarPhoto" class="avatar-photo" alt="本地生成的三视图分身预览">
+              <img id="avatarPhoto" class="avatar-photo" alt="本地生成的照片分身预览">
               <div class="twin-figure"><i class="twin-head"></i><i class="twin-hair"></i><i class="twin-top"></i><i class="twin-bottom"></i><i class="twin-leg left"></i><i class="twin-leg right"></i></div>
               <span class="view-label" id="viewLabel">FRONT / 正面</span>
               <span class="twin-badge">BODY-ALIGNED<br>PREVIEW</span>
             </div>
-            <div class="measure-row"><span>照片分身</span><b id="avatarState">待生成</b><span>三视图切换</span><b id="avatarRoute">上传后可用</b></div>
+            <div class="measure-row"><span>照片分身</span><b id="avatarState">待生成</b><span>可用视角</span><b id="avatarRoute">上传正面照后可用</b></div>
           </article>
         </div>
       </section>
@@ -99,7 +99,7 @@
       <section class="studio" id="studio">
         <div class="section-heading">
           <div><p class="eyebrow">AI FITTING ROOM</p><h2>点选人物，把穿搭穿上去</h2></div>
-          <p>先选人物，再选一套穿搭。当前接入公开示例模特用于非商业生成；你的照片不会在这个 POC 中上传。</p>
+          <p>先选人物，再选一套穿搭。长裙优先使用无遮挡的全身正面照；当前接入公开全身示例用于非商业生成，你的照片不会在这个 POC 中上传。</p>
         </div>
 
         <div class="fitting-grid">
@@ -118,12 +118,12 @@
               <img id="modelPreview" alt="公开示例模特">
               <div class="model-placeholder"><span></span><b>DEMO<br>MODEL</b></div>
             </div>
-            <p class="selection-title">公开示例人像（非商业 POC）</p>
+            <p id="modelTitle" class="selection-title">公开全身示例人像（非商业 POC）</p>
             <div class="persona-options" role="group" aria-label="选择试衣人物">
               <button class="persona selected" data-persona="demo" type="button"><span>01</span> 示例分身</button>
               <button class="persona" data-persona="twin" type="button"><span>02</span> 我的分身</button>
             </div>
-            <div class="privacy-line"><span>✓</span> 不上传你的真人照片</div>
+            <div class="privacy-line"><span>✓</span> 照片仅在本机处理</div>
           </article>
 
           <div class="flow-arrow accent" aria-hidden="true">→</div>
@@ -159,7 +159,7 @@
       </section>
 
       <section class="about" id="about">
-        <p><b>POC 路线</b> 商品标题、图片和价格来自已登录联盟选品页；价格仅作参考，以平台结算页为准。当前「一键试衣」是在本机 Apple GPU 上运行的 CatVTON 2D 生成式 POC，模型材料采用 CC BY-NC-SA 4.0，仅限非商业验证。三视图分身是本地交互预览，试衣使用正面照且不会发送到第三方。</p>
+        <p><b>POC 路线</b> 商品标题、图片和价格来自已登录联盟选品页；价格仅作参考，以平台结算页为准。当前「一键试衣」是在本机 Apple GPU 上运行的 CatVTON 2D 生成式 POC，模型材料采用 CC BY-NC-SA 4.0，仅限非商业验证。照片分身支持一张正面照创建；侧、背照片仅用于补充本地预览，试衣始终使用正面照且不会发送到第三方。</p>
       </section>
     </main>
   </div>
