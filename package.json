@@ -6,6 +6,16 @@
   "scripts": {
     "poc:gateways": "node poc/channel-gateway-poc.mjs",
     "poc:official-products": "node poc/official-product-poc.mjs",
-    "poc:query-router:test": "node poc/query-router.mjs --self-test"
+    "poc:query-router:test": "node poc/query-router.mjs --self-test",
+    "poc:tryon-sources": "node poc/tryon-resources-poc.mjs",
+    "poc:idm-vton-demo": "node poc/idm-vton-public-demo-poc.mjs",
+    "poc:idm-vton-pdd-product": "node poc/idm-vton-pdd-product-poc.mjs",
+    "poc:oot-diffusion-demo": "node poc/oot-diffusion-public-demo-poc.mjs",
+    "poc:fal-cat-vton": "node poc/fal-cat-vton-poc.mjs",
+    "poc:fal-fashn-vton": "node poc/fal-fashn-vton-poc.mjs",
+    "poc:managed-vton-readiness": "node poc/managed-vton-readiness-poc.mjs",
+    "poc:kolors-demo-probe": "node poc/kolors-public-demo-probe.mjs",
+    "poc:product-image-readiness": "node poc/product-image-readiness-poc.mjs",
+    "poc:self-host-readiness": "node poc/self-host-readiness-poc.mjs"
   }
 }

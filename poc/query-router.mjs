@@ -1,6 +1,13 @@
 const PDD_SINGLE_PROMOTION = 'https://jinbao.pinduoduo.com/promotion/single-promotion';
 const TAOBAO_GOODS = 'https://pub.alimama.com/portal/v2/pages/promo/goods/index.htm';
 
+// 用户给出的三个已验证入口。保留原始地址，避免用占位域名替代真实渠道。
+export const WOMENS_CLOTHING_ENTRY_URLS = [
+  'https://jinbao.pinduoduo.com/promotion/single-promotion?keyword=女装',
+  'https://jinbao.pinduoduo.com/promotion/single-promotion?keyword=%E5%A5%B3%E8%A3%85',
+  'https://pub.alimama.com/portal/v2/pages/promo/goods/index.htm?pageNum=1&pageSize=30&filters=%257B%257D&fn=search&q=%E5%A5%B3%E8%A3%85&sort=default&selected=%257B%257D&floorId=80674',
+];
+
 export function normalizeOutfitQuery(prompt) {
   const normalized = String(prompt ?? '').replace(/\s+/g, ' ').trim();
   if (!normalized) return '女装';
@@ -29,6 +36,9 @@ export function buildSearchRoutes(prompt) {
 }
 
 function selfTest() {
+  if (WOMENS_CLOTHING_ENTRY_URLS.length !== 3) throw new Error('必须保留用户给出的三个真实入口');
+  const allowedHosts = new Set(['jinbao.pinduoduo.com', 'pub.alimama.com']);
+  if (WOMENS_CLOTHING_ENTRY_URLS.some((url) => !allowedHosts.has(new URL(url).hostname))) throw new Error('入口必须指向用户指定的真实渠道');
   const routes = buildSearchRoutes('通勤 连衣裙');
   if (routes.query !== '通勤 连衣裙') throw new Error('服饰提示词不应被改写');
   if (!routes.pinduoduo.includes('keyword=%E9%80%9A%E5%8B%A4+%E8%BF%9E%E8%A1%A3%E8%A3%99')) throw new Error('拼多多关键词路由错误');

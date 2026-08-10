@@ -56,6 +56,12 @@ TAOBAO_ADZONE_ID=
 
 ## 从穿搭提示词检索服饰
 
+POC 直接使用以下三个用户提供的真实入口：
+
+- 多多进宝（原始中文关键词）：<https://jinbao.pinduoduo.com/promotion/single-promotion?keyword=女装>
+- 多多进宝（URL 编码关键词）：<https://jinbao.pinduoduo.com/promotion/single-promotion?keyword=%E5%A5%B3%E8%A3%85>
+- 淘宝联盟：<https://pub.alimama.com/portal/v2/pages/promo/goods/index.htm?pageNum=1&pageSize=30&filters=%257B%257D&fn=search&q=%E5%A5%B3%E8%A3%85&sort=default&selected=%257B%257D&floorId=80674>
+
 `poc/query-router.mjs` 把用户提示词规范为服饰检索词，并生成已验证的联盟搜索页 URL：
 
 ```bash
@@ -66,6 +72,70 @@ node poc/query-router.mjs "通勤 连衣裙"
 - 淘宝/天猫：联盟选品页的 `q=<检索词>`、`fn=search`、`pageSize=30` 路由。
 
 提示词应先由搭配器展开为可检索的服饰词（如“通勤连衣裙”“夏季衬衫”“小个子阔腿裤”）；路由器会给没有品类的短词补上“女装”。**URL 只负责打开选品页，不代表已获得商品数据**：只有联盟 API 或已授权页面返回的主图、标题和价格才能进入 Dressly 候选池。
+
+2026-08-10 的 Chrome L1 验证中，多多进宝编码入口成功显示“女装”结果页，并可从商品卡片读取标题、价格/券后价、佣金、佣金比例、销量、店铺与拼多多主图 URL；首批真实样例见 [`poc/pdd-womens-clothing-sample.json`](poc/pdd-womens-clothing-sample.json)。淘宝联盟入口当前重定向到官方登录页，因此未把登录页误记成商品结果。
+
+可复跑商品图外部可取性检查：
+
+```bash
+npm run poc:product-image-readiness
+```
+
+当前多多进宝样例主图返回 `200 image/jpeg`、`Access-Control-Allow-Origin: *`，尺寸为 400×400，说明托管试衣服务可以直接取图；但分辨率只够效果 POC。生产候选池应优先使用联盟 API 返回的最大原始主图，并对低于 768px 的图片降级或剔除。
+
+## AI 试衣资源 POC
+
+```bash
+npm run poc:tryon-sources
+```
+
+试衣生成至少需要三项输入：用户明确同意使用的人像、商品/服装图、服装类别（上装、下装、连衣裙等）。脚本列出当前已核验的来源与许可证边界：
+
+- **非商业效果 POC**：IDM-VTON、CatVTON、OOTDiffusion 的常见发布路径带 `CC BY-NC-SA 4.0`，不能直接用于 Dressly 商业上线。OOTDiffusion 曾完成真实生成，但复跑已明确返回匿名 ZeroGPU 配额耗尽；IDM-VTON 曾完成生成但后续复跑返回服务端错误，CatVTON 当前也返回服务端错误。三者均只保留为不稳定、非商业候选。
+- **自托管商业候选**：DCI-VTON 的代码仓库为 MIT；仍必须在接入前逐项核验权重、底座模型、训练数据及输出使用条款。
+- **托管商业候选**：FASHN Try-On Max、fal.ai CatVTON 都要求账户/API Key；页面上的“免费开始”或计费展示不等于已取得可用于生产的免费额度或商用授权。
+
+商品图仍应从联盟 API/已授权选品页取得；试衣图不能通过绕过平台登录或反爬取得。用户人像应以临时、可撤回处理为默认，且不应写入仓库或日志。
+
+无需注册的端到端效果验证可运行：
+
+```bash
+npm run poc:idm-vton-demo
+npm run poc:oot-diffusion-demo
+npm run poc:idm-vton-pdd-product
+```
+
+前两个脚本只使用对应 Space 自带的公开样例，实际提交一次试衣并输出结果 URL，不上传用户图或商品图。它们用于非商业 POC，不得作为生产依赖。
+
+`poc:idm-vton-pdd-product` 是端到端商品链路：读取多多进宝真实女装样例的主图，搭配 IDM-VTON 官方内置人像，上传并执行一次试衣。2026-08-10 已真实得到 768×1024 PNG；白色针织开衫、黑色蝴蝶结和黑色口袋等商品特征被保留。该结果证明“联盟商品图 → 试衣”技术链路，但 IDM-VTON 的 `CC BY-NC-SA 4.0` 仍限制其只能用于非商业 POC。
+
+托管 API 的可复跑入口：
+
+```bash
+npm run poc:fal-cat-vton
+npm run poc:fal-fashn-vton
+npm run poc:managed-vton-readiness
+npm run poc:kolors-demo-probe
+```
+
+前两个脚本分别遵循 fal.ai 公开的 CatVTON 与 FASHN v1.5 队列接口：账号创建后只需在本地 `.env` 写入 `FAL_KEY`，脚本会提交并返回请求与状态 URL；没有 Key 时只输出 `blocked`，不发送请求。默认仅使用官方文档的公开样例 URL；要接入 Dressly 时再在服务端替换为联盟商品图 URL 和经用户同意的人像 URL。`managed-vton-readiness` 还列出 Google Vertex `virtual-try-on-001`、AWS Nova Canvas 与 FASHN 直连 API 的账户、计费和凭证门槛。
+
+`kolors-demo-probe` 会实时读取快手官方 Hugging Face Space 配置。当前能确认 12 组样例和 UI 生成按钮，但生成函数没有公开 API 名称，因此只可手工试用，不能当作 Dressly 可复跑接口。
+
+当前商用优先级：
+
+1. **fal/FASHN v1.5**：页面明确标注 Commercial use，接入最小；但免费 credits/coupons 只能在 Sandbox/Playground 使用，API 调用仍需 Key 与可用余额。
+2. **Google Vertex AI**：`virtual-try-on-001` 已 GA，官方当前价格为 0.06 美元/图；需要 GCP 项目、计费与服务身份。
+3. **AWS Nova Canvas**：Bedrock 原生 `VIRTUAL_TRY_ON`，支持自动服装蒙版、上/下/全身和鞋类；需要 AWS 模型访问与计费。
+4. **Kolors Virtual Try-On**：代码 Apache-2.0 不等于权重可直接商用；MAU 不超过 3 亿的商业使用仍须向快手提交官方登记问卷。
+
+自托管候选的本机前置检查：
+
+```bash
+npm run poc:self-host-readiness
+```
+
+DCI-VTON 的代码仓库为 MIT，但上游推理说明面向 CUDA/Linux。当前 Mac 为 arm64 且没有检测到 NVIDIA CUDA GPU，所以不是该模型的本机推理宿主；若走自托管，需要单独的 CUDA GPU 机器，并在部署前审查权重、底座模型和训练数据的许可证。
 
 ## 需要的平台身份
 

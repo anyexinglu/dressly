@@ -1,0 +1,53 @@
+{
+  "capturedAt": "2026-08-10",
+  "sourceUrl": "https://jinbao.pinduoduo.com/promotion/single-promotion?keyword=%E5%A5%B3%E8%A3%85",
+  "source": "多多进宝已登录女装搜索页",
+  "scope": "Chrome L1 页面证据；价格为抓取时页面参考价，可能随 SKU、地区、优惠和活动变化。",
+  "products": [
+    {
+      "title": "【甜妹天菜】微胖mm显瘦法式纯欲气质修身辣妹吊带开衫三件套女夏",
+      "price": "21.80",
+      "commission": "0.13",
+      "commissionRate": "0.6%",
+      "sales": "9646",
+      "shop": "小兔瘦竹竿",
+      "imageUrl": "https://img.pddpic.com/gaudit-image/2024-03-27/213a43b26ba8471d1e1ad5c6fc96285d.jpeg@500w_1l_50Q.JP2"
+    },
+    {
+      "title": "日系软妹可爱减龄学院卫衣女学生韩版春季新款洛丽塔百搭上衣外套【8月16日发完】",
+      "price": "71.70",
+      "commission": "2.15",
+      "commissionRate": "3%",
+      "sales": "7498",
+      "shop": "代色婷丽专卖店",
+      "imageUrl": "https://img.pddpic.com/gaudit-image/2025-02-10/64308d1ffd60e758b9e59aef28cb786e.jpeg@500w_1l_50Q.JP2"
+    },
+    {
+      "title": "新品正品爆款女上百穿不厌经典条纹套装宽松大码休闲运动居家游玩",
+      "price": "21.90",
+      "commission": "0.72",
+      "commissionRate": "3.3%",
+      "sales": "3988",
+      "shop": "满偌鞋服专营店",
+      "imageUrl": "https://img.pddpic.com/gaudit-image/2026-07-21/da53f8a57a8eea920e23dd7324eeb30c.jpeg@500w_1l_50Q.JP2"
+    },
+    {
+      "title": "青苹果绿法式Lolita优雅新款蕾丝夏季甜美斗篷连衣裙系带收腰长裙",
+      "price": "93.80",
+      "commission": "2.81",
+      "commissionRate": "3%",
+      "sales": "6636",
+      "shop": "朱秀素衣",
+      "imageUrl": "https://img.pddpic.com/gaudit-image/2026-07-30/850dcad8e0b67c45fd5c1e7ede536514.jpeg@500w_1l_50Q.JP2"
+    },
+    {
+      "title": "春季时尚大小姐高级新款衬衫马甲宽松多巴胺穿搭青春感时尚两件套",
+      "price": "11.46",
+      "commission": "0.34",
+      "commissionRate": "3%",
+      "sales": "501",
+      "shop": "冰懿女装旗舰店",
+      "imageUrl": "https://img.pddpic.com/gaudit-image/2025-11-17/78fa830e2b43e4362db2dbe5449d2e3e.jpeg@500w_1l_50Q.JP2"
+    }
+  ]
+}
