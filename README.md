@@ -73,7 +73,7 @@ node poc/query-router.mjs "通勤 连衣裙"
 
 提示词应先由搭配器展开为可检索的服饰词（如“通勤连衣裙”“夏季衬衫”“小个子阔腿裤”）；路由器会给没有品类的短词补上“女装”。**URL 只负责打开选品页，不代表已获得商品数据**：只有联盟 API 或已授权页面返回的主图、标题和价格才能进入 Dressly 候选池。
 
-2026-08-10 的 Chrome L1 验证中，多多进宝编码入口成功显示“女装”结果页，并可从商品卡片读取标题、价格/券后价、佣金、佣金比例、销量、店铺与拼多多主图 URL；首批真实样例见 [`poc/pdd-womens-clothing-sample.json`](poc/pdd-womens-clothing-sample.json)。淘宝联盟入口当前重定向到官方登录页，因此未把登录页误记成商品结果。
+2026-08-10 的 Chrome L1 验证中，多多进宝编码入口成功显示“女装”结果页，并可从商品卡片读取标题、价格/券后价、佣金、佣金比例、销量、店铺与拼多多主图 URL；首批真实样例见 [`poc/pdd-womens-clothing-sample.json`](poc/pdd-womens-clothing-sample.json)。随后淘宝联盟登录态恢复，同一“女装”入口显示当前 1–30 条、共 1200 条；已逐卡核验 10 条标题、价格类型、价格、佣金率和佣金，并读取首件商品的阿里主图，见 [`poc/taobao-womens-clothing-sample.json`](poc/taobao-womens-clothing-sample.json)。动态页面的整批 DOM 读取多次超时，所以未把未核验的 20 条或图片 URL 猜写进样例。
 
 可复跑商品图外部可取性检查：
 
@@ -81,7 +81,7 @@ node poc/query-router.mjs "通勤 连衣裙"
 npm run poc:product-image-readiness
 ```
 
-当前多多进宝样例主图返回 `200 image/jpeg`、`Access-Control-Allow-Origin: *`，尺寸为 400×400，说明托管试衣服务可以直接取图；但分辨率只够效果 POC。生产候选池应优先使用联盟 API 返回的最大原始主图，并对低于 768px 的图片降级或剔除。
+脚本会同时检查多多进宝与淘宝联盟样例中的真实主图 URL，记录 HTTP、MIME、CORS 和尺寸。生产候选池仍应优先使用联盟 API 返回的最大原始主图，并对低于 768px 的图片降级或剔除。
 
 ## AI 试衣资源 POC
 
@@ -93,6 +93,7 @@ npm run poc:tryon-sources
 
 - **非商业效果 POC**：IDM-VTON、CatVTON、OOTDiffusion 的常见发布路径带 `CC BY-NC-SA 4.0`，不能直接用于 Dressly 商业上线。OOTDiffusion 曾完成真实生成，但复跑已明确返回匿名 ZeroGPU 配额耗尽；IDM-VTON 曾完成生成但后续复跑返回服务端错误，CatVTON 当前也返回服务端错误。三者均只保留为不稳定、非商业候选。
 - **自托管商业候选**：DCI-VTON 的代码仓库为 MIT；仍必须在接入前逐项核验权重、底座模型、训练数据及输出使用条款。
+- **新增自托管候选**：Leffa 的代码仓库和 Hugging Face 模型卡均标注 MIT，并公开了上装、下装、连衣裙能力；但还依赖 SD/SDXL Inpainting、DensePose、SCHP 等组件，商用前必须做完整依赖审计。SwiftTry 的代码为 BSD-3-Clause，但模型派生自 SD-Turbo，不能只看代码许可证。
 - **托管商业候选**：FASHN Try-On Max、fal.ai CatVTON 都要求账户/API Key；页面上的“免费开始”或计费展示不等于已取得可用于生产的免费额度或商用授权。
 
 商品图仍应从联盟 API/已授权选品页取得；试衣图不能通过绕过平台登录或反爬取得。用户人像应以临时、可撤回处理为默认，且不应写入仓库或日志。
@@ -116,11 +117,16 @@ npm run poc:fal-cat-vton
 npm run poc:fal-fashn-vton
 npm run poc:managed-vton-readiness
 npm run poc:kolors-demo-probe
+npm run poc:leffa-demo-probe
 ```
 
 前两个脚本分别遵循 fal.ai 公开的 CatVTON 与 FASHN v1.5 队列接口：账号创建后只需在本地 `.env` 写入 `FAL_KEY`，脚本会提交并返回请求与状态 URL；没有 Key 时只输出 `blocked`，不发送请求。默认仅使用官方文档的公开样例 URL；要接入 Dressly 时再在服务端替换为联盟商品图 URL 和经用户同意的人像 URL。`managed-vton-readiness` 还列出 Google Vertex `virtual-try-on-001`、AWS Nova Canvas 与 FASHN 直连 API 的账户、计费和凭证门槛。
 
 `kolors-demo-probe` 会实时读取快手官方 Hugging Face Space 配置。当前能确认 12 组样例和 UI 生成按钮，但生成函数没有公开 API 名称，因此只可手工试用，不能当作 Dressly 可复跑接口。
+
+`leffa-demo-probe` 会同时读取作者 Space 的公开 API Schema、样例数量和 Hugging Face 模型许可证，并真实提交一次公开样例。当前接口公开、模型非 gated，但连续三次生成任务都立即返回服务端 error；因此 Leffa 只提升了“免费可自托管”的候选质量，没有形成新的稳定免费托管容量。
+
+另外复核了 Hugging Face 搜索结果中较高热度的 Miragic 与 WeShopAI：两者都把推理转发到外部服务。Miragic 未声明许可证、核心逻辑被混淆，本轮任务有 event id 但无结果；WeShopAI 模型卡许可证为 `other` 并启用 Hugging Face OAuth。它们可以人工对照效果，但不满足 Dressly 对可审计许可证、稳定复跑和商用边界的要求。
 
 当前商用优先级：
 

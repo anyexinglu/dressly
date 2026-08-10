@@ -1,0 +1,105 @@
+{
+  "capturedAt": "2026-08-10",
+  "sourceUrl": "https://pub.alimama.com/portal/v2/pages/promo/goods/index.htm?pageNum=1&pageSize=30&filters=%257B%257D&fn=search&q=%E5%A5%B3%E8%A3%85&sort=default&selected=%257B%257D&floorId=80674",
+  "source": "淘宝联盟已登录女装搜索页",
+  "scope": "Chrome L1 页面证据；页面显示当前 1-30 条、共 1200 条。价格为抓取时对应价格类型的参考价，可能随会员、地区、优惠和活动变化。",
+  "capture": {
+    "pageItemCount": 30,
+    "reportedTotal": 1200,
+    "textSamples": 10,
+    "imageSamples": 1,
+    "note": "动态卡片的批量 DOM 读取多次超时，因此只提交已逐卡核验的数据；未把未读取到的图片 URL 补写或猜测。"
+  },
+  "products": [
+    {
+      "title": "新品首降丨SANDRO2026夏季新款女装法式撞色仿钻饰拼接裙摆连衣裙",
+      "priceType": "88VIP价",
+      "price": "1806.00",
+      "commission": "32.51",
+      "commissionRate": "1.80%",
+      "dailyPromotionSales": 0,
+      "imageUrl": "https://img.alicdn.com/bao/uploaded/O1CN010e87Ya1HVxhq1FE8m_!!6000000000764-2-yinhe.png"
+    },
+    {
+      "title": "SANDRO秋季女装法式时尚甜美翻领仿珠饰花呢百褶短款茶歇裙连衣裙",
+      "priceType": "88VIP价",
+      "price": "1487.00",
+      "commission": "26.77",
+      "commissionRate": "1.80%",
+      "dailyPromotionSales": 0,
+      "imageUrl": null
+    },
+    {
+      "title": "【赵晴同款】Fabrique钩针米白色背心拼接镂空刺绣连衣裙春夏女装",
+      "priceType": "88VIP价",
+      "price": "1531.50",
+      "commission": "22.97",
+      "commissionRate": "1.50%",
+      "dailyPromotionSales": null,
+      "imageUrl": null
+    },
+    {
+      "title": "新品首降丨SANDRO2026夏季新款女装法式肌理针织A字短袖连衣裙",
+      "priceType": "88VIP价",
+      "price": "1721.00",
+      "commission": "77.45",
+      "commissionRate": "4.50%",
+      "dailyPromotionSales": null,
+      "imageUrl": null
+    },
+    {
+      "title": "新品首降|Maje2026春夏新款女装淡黄色粗花呢圆领无袖短款连衣裙",
+      "priceType": "88VIP价",
+      "price": "1791.00",
+      "commission": "1.61",
+      "commissionRate": "0.09%",
+      "dailyPromotionSales": 0,
+      "imageUrl": null
+    },
+    {
+      "title": "OVV春夏新款女装淡人22MM弹力重绉V型小立领桑蚕丝长袖衬衫",
+      "priceType": "88VIP价",
+      "price": "589.00",
+      "commission": "9.78",
+      "commissionRate": "1.66%",
+      "dailyPromotionSales": null,
+      "imageUrl": null
+    },
+    {
+      "title": "新品首降丨SANDRO2026夏季新款女装法式木耳边裙摆收腰针织连衣裙",
+      "priceType": "88VIP价",
+      "price": "1488.00",
+      "commission": "66.96",
+      "commissionRate": "4.50%",
+      "dailyPromotionSales": 0,
+      "imageUrl": null
+    },
+    {
+      "title": "Fabrique巴洛克玫瑰荷叶边印花收腰系带连衣裙春夏女装棉真丝长裙",
+      "priceType": "88VIP价",
+      "price": "1281.50",
+      "commission": "19.22",
+      "commissionRate": "1.50%",
+      "dailyPromotionSales": null,
+      "imageUrl": null
+    },
+    {
+      "title": "HM女装衬衫2026夏季新款时尚通勤气质舒适潮流亚麻衬衫1314718",
+      "priceType": "平台加补后",
+      "price": "199.00",
+      "commission": "2.99",
+      "commissionRate": "1.50%",
+      "dailyPromotionSales": 0,
+      "imageUrl": null
+    },
+    {
+      "title": "【叶童同款】Fabrique午后恋人玫瑰印花真丝休闲裤女春夏女装",
+      "priceType": "88VIP价",
+      "price": "1259.70",
+      "commission": "18.90",
+      "commissionRate": "1.50%",
+      "dailyPromotionSales": 0,
+      "imageUrl": null
+    }
+  ]
+}
