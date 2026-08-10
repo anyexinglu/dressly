@@ -8,7 +8,18 @@ Dressly 是一个“每日穿搭”概念验证项目：根据风格和预算组
 npm run dev
 ```
 
-访问 <http://127.0.0.1:4173>。界面会载入已核验的拼多多与淘宝联盟商品样本，使用 IDM-VTON 的公开示例模特执行非商业一键试衣 POC；不会上传用户真人照片。免费 Hugging Face Space 是共享实验服务，并不提供 SLA：后端会自动尝试两次、如实返回失败状态，并只在获得真实结果图后显示“实时生成完成”。首件拼多多样例另附一张 2026-08-10 已真实生成并校验的缓存结果；实时服务失败时会明确标注“已验证缓存结果”，不会冒充本次生成。
+访问 <http://127.0.0.1:4173>。界面会载入已核验的拼多多与淘宝联盟商品样本，并在本机 Apple MPS 上运行 CatVTON 非商业试衣 POC。示例人物和用户主动选择的正面照都只进入本机 Node/Python 进程；结果必须由本次请求新生成，失败时不会回退到历史缓存图。
+
+首次运行前需要准备隔离环境与官方模型（模型缓存不会提交 Git）：
+
+```bash
+python3 -m venv .venv
+.venv/bin/pip install torch==2.2.2 torchvision==0.17.2 diffusers==0.29.2 transformers==4.27.3 accelerate==0.31.0 huggingface_hub==0.23.4 hf_transfer numpy==1.26.4 pillow safetensors
+git clone --depth 1 https://github.com/Zheng-Chong/CatVTON.git .local-models/CatVTON
+npm run poc:local-catvton -- --garment /path/to/garment.jpg
+```
+
+首次 POC 只需准备实际推理所需的 fp16 UNet、VAE 和 CatVTON attention 权重；后续页面请求复用本地缓存。2026-08-10 已在 Apple M5 / MPS 上完成 20 步真实生成，并通过页面按钮得到新的 384×512 结果（`live: true`、`cached: false`）。CatVTON 材料为 `CC BY-NC-SA 4.0`，这条链路只能用于非商业技术验证。联盟商品常是穿在人身上的展示图，而 CatVTON 更适合纯服装图；前者已能生成，但服装纹理和版型还原不稳定，后续需要服装分割或更适配的商品素材。
 
 ## 数据边界
 
@@ -99,7 +110,7 @@ npm run poc:tryon-sources
 
 试衣生成至少需要三项输入：用户明确同意使用的人像、商品/服装图、服装类别（上装、下装、连衣裙等）。脚本列出当前已核验的来源与许可证边界：
 
-- **非商业效果 POC**：IDM-VTON、CatVTON、OOTDiffusion 的常见发布路径带 `CC BY-NC-SA 4.0`，不能直接用于 Dressly 商业上线。OOTDiffusion 曾完成真实生成，但复跑已明确返回匿名 ZeroGPU 配额耗尽；IDM-VTON 曾完成生成但后续复跑返回服务端错误，CatVTON 当前也返回服务端错误。三者均只保留为不稳定、非商业候选。
+- **非商业效果 POC**：IDM-VTON、CatVTON、OOTDiffusion 的常见发布路径带 `CC BY-NC-SA 4.0`，不能直接用于 Dressly 商业上线。OOTDiffusion 曾完成真实生成，但复跑已明确返回匿名 ZeroGPU 配额耗尽；IDM-VTON 曾完成生成但后续复跑返回服务端错误；CatVTON 公共 Space 同样不稳定，但本仓库已改为本机 Apple MPS 推理并完成真实页面验收。三者都只能作为非商业验证路径，不能据此推定生产 SLA 或商用授权。
 - **自托管商业候选**：DCI-VTON 的代码仓库为 MIT；仍必须在接入前逐项核验权重、底座模型、训练数据及输出使用条款。
 - **新增自托管候选**：Leffa 的代码仓库和 Hugging Face 模型卡均标注 MIT，并公开了上装、下装、连衣裙能力；但还依赖 SD/SDXL Inpainting、DensePose、SCHP 等组件，商用前必须做完整依赖审计。SwiftTry 的代码为 BSD-3-Clause，但模型派生自 SD-Turbo，不能只看代码许可证。
 - **托管商业候选**：FASHN Try-On Max、fal.ai CatVTON 都要求账户/API Key；页面上的“免费开始”或计费展示不等于已取得可用于生产的免费额度或商用授权。

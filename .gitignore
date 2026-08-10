@@ -2,4 +2,7 @@
 poc/report.json
 poc/official-products-report.json
 node_modules/
+.venv/
+.local-models/
+.cache/
 .codex/

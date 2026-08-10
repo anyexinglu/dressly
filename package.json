@@ -17,6 +17,7 @@
     "poc:managed-vton-readiness": "node poc/managed-vton-readiness-poc.mjs",
     "poc:kolors-demo-probe": "node poc/kolors-public-demo-probe.mjs",
     "poc:leffa-demo-probe": "node poc/leffa-public-demo-probe.mjs",
+    "poc:local-catvton": ".venv/bin/python poc/local-catvton-poc.py",
     "poc:product-image-readiness": "node poc/product-image-readiness-poc.mjs",
     "poc:self-host-readiness": "node poc/self-host-readiness-poc.mjs"
   }
