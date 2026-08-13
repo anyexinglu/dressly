@@ -45,13 +45,10 @@
           </div>
         </div>
         <div class="hero-art" aria-hidden="true">
-          <div class="sun"></div>
-          <div class="arch arch-one"></div>
-          <div class="arch arch-two"></div>
-          <div class="figure">
-            <span class="head"></span><span class="hair"></span><span class="body"></span><span class="skirt"></span><span class="leg left"></span><span class="leg right"></span>
-          </div>
-          <span class="art-note">YOUR LOOK<br>IN SECONDS</span>
+          <div class="hero-art-grid"></div>
+          <img class="hero-twin-art" src="./assets/digital-twin-concept-v2.png" alt="">
+          <span class="art-label">DIGITAL TWIN SYSTEM</span>
+          <span class="art-note">CONCEPT VISUAL<br>3D ROADMAP</span>
         </div>
       </section>
 
@@ -87,9 +84,10 @@
             <div class="twin-viewport" id="twinViewport" data-view="front">
               <div class="twin-halo"></div><div class="twin-shadow"></div>
               <img id="avatarPhoto" class="avatar-photo" alt="本地生成的照片分身预览">
+              <img class="twin-concept-art" src="./assets/digital-twin-concept-v2.png" alt="穿着完整科技服装的抽象数字人体原型示意">
               <div class="twin-figure"><i class="twin-head"></i><i class="twin-hair"></i><i class="twin-top"></i><i class="twin-bottom"></i><i class="twin-leg left"></i><i class="twin-leg right"></i></div>
               <span class="view-label" id="viewLabel">FRONT / 正面</span>
-              <span class="twin-badge">BODY-ALIGNED<br>PREVIEW</span>
+              <span class="twin-badge">CONCEPT VISUAL<br>3D ROADMAP</span>
             </div>
             <div class="measure-row"><span>照片分身</span><b id="avatarState">待生成</b><span>可用视角</span><b id="avatarRoute">上传正面照后可用</b></div>
           </article>
@@ -136,6 +134,8 @@
               <div class="result-loading" hidden><i></i><p id="loadingText">正在理解衣服版型…</p></div>
             </div>
             <button id="tryOnButton" class="try-button" type="button"><span>✦</span> 一键试穿</button>
+            <a id="shopButton" class="shop-button" href="#" target="_blank" rel="noopener noreferrer" hidden>满意，去平台查看 <span>↗</span></a>
+            <p class="checkout-note">参考价与优惠可能变化，以平台结算页为准</p>
             <p id="statusText" class="status-text">本机 CatVTON · Apple MPS 实时生成</p>
           </article>
         </div>

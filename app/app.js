@@ -2,6 +2,7 @@ const state = { products: [], selected: null, source: "all", persona: "demo", av
 const elements = Object.fromEntries([
   "productGrid", "garmentPreview", "garmentTitle", "garmentPrice", "channelLabel", "modelPreview", "modelFrame",
   "resultPreview", "resultFrame", "tryOnButton", "statusText", "loadingText", "stylePrompt", "searchButton",
+  "shopButton",
 ].map((id) => [id, document.getElementById(id)]));
 
 function money(value) {
@@ -22,6 +23,8 @@ function selectProduct(product) {
   elements.channelLabel.textContent = product.channel;
   elements.resultPreview.removeAttribute("src");
   elements.resultFrame.classList.remove("has-result");
+  elements.shopButton.hidden = true;
+  elements.shopButton.removeAttribute("href");
   elements.statusText.textContent = qualityStatus(product);
   renderProducts();
   document.getElementById("studio").scrollIntoView({ behavior: "smooth", block: "start" });
@@ -149,11 +152,15 @@ async function tryOn() {
     if (!response.ok) throw new Error(result.error || "试衣生成失败");
     elements.resultPreview.src = result.imageUrl;
     elements.resultFrame.classList.add("has-result");
+    elements.shopButton.href = state.selected.sourceUrl;
+    elements.shopButton.hidden = false;
     const detailStatus = result.detailReinforcement?.applied
       ? ` · 已增强 ${result.detailReinforcement.count} 个装饰细节`
       : "";
     elements.statusText.textContent = `本机实时生成完成 · CatVTON / Apple MPS${detailStatus} · 任务 ${result.eventId.slice(0, 8)}`;
   } catch (error) {
+    elements.shopButton.hidden = true;
+    elements.shopButton.removeAttribute("href");
     elements.statusText.textContent = `未生成成功 · ${error.message}`;
     elements.resultFrame.querySelector(".result-empty").hidden = false;
     elements.resultFrame.querySelector(".result-empty p").textContent = "本次没有生成结果\n请查看本机模型状态";

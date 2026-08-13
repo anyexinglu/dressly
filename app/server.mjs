@@ -187,6 +187,7 @@ const mimeTypes = {
   ".css": "text/css; charset=utf-8",
   ".js": "text/javascript; charset=utf-8",
   ".svg": "image/svg+xml",
+  ".png": "image/png",
 };
 
 const server = createServer(async (request, response) => {
@@ -250,7 +251,7 @@ const server = createServer(async (request, response) => {
     }
 
     const requestedPath = url.pathname === "/" ? "index.html" : url.pathname.slice(1);
-    if (!new Set(["index.html", "styles.css", "app.js"]).has(requestedPath)) {
+    if (!new Set(["index.html", "styles.css", "app.js", "assets/digital-twin-concept-v2.png"]).has(requestedPath)) {
       response.writeHead(404).end("Not found");
       return;
     }
